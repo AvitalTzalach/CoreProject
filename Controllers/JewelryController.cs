@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Project.interfaces;
 using Project.Models;
+using Project.Services;
 
 namespace Project.Controllers;
 
@@ -7,66 +9,48 @@ namespace Project.Controllers;
 [Route("[controller]")]
 public class JewelryController : ControllerBase
 {
-    private static List<Jewel> jewelryList;
+    private IJewelService iJewelService;
 
-    //בנאי סטאטי שנקרא בפעם הרשונה שהמחלקה נטענת
-    static JewelryController()
+    public JewelryController(IJewelService iJewelService)
     {
-        jewelryList = new List<Jewel> 
-        {
-            new Jewel { Id = 1, Name = "עגילי כסף דרופ פפיון נוצץ", Price = 335, Category = CategoryJewel.Earrings },
-            new Jewel { Id = 2, Name = "טבעת כסף משאלת הנסיכה", Price = 379, Category = CategoryJewel.Ring }
-        };
+        this.iJewelService = iJewelService;
     }
-
-    //ID-פונקציה שמחזירה אוביקט קיים לפי 
-    private Jewel? SearchJewelById(int id)
-    {
-        Jewel? oldJewel = jewelryList.FirstOrDefault(p => p.Id == id);
-        return oldJewel;
-    }
-
     //פונקציה לקבלת רשימת הנתונים
     [HttpGet]
-    public IEnumerable<Jewel> Get()
-    {
-        return jewelryList;
-    }
+    public ActionResult<List<Jewel>> Get()=>
+       iJewelService.GetAllList();
+   
 
     //id-פונקציה לקבלת אוביקט לפי 
     [HttpGet("{id}")]
     public ActionResult<Jewel> Get(int id)
     {
-        Jewel? jewel = SearchJewelById(id);
+        Jewel? jewel = iJewelService.GetJewelById(id);
         if (jewel == null)
             return BadRequest("Invalid id");
         return jewel;
     }
 
-    //מכניס אוביקט לרשימה
+    //מכניס אוביקט חדש לרשימה
     [HttpPost]
-    public ActionResult Insert(Jewel newJewel)
+    public ActionResult Create(Jewel newJewel)
     {        
-        int maxId = jewelryList.Max(p => p.Id);
-        newJewel.Id = maxId + 1;
-        jewelryList.Add(newJewel);
-
-        return CreatedAtAction(nameof(Insert), new { id = newJewel.Id }, newJewel);
+        iJewelService.Create(newJewel);
+        return CreatedAtAction(nameof(Create), new { id = newJewel.Id }, newJewel);
     }  
 
     //מעדכן אוביקט מהרשימה
     [HttpPut("{id}")]
     public ActionResult Update(int id, Jewel jewel)
     { 
-        Jewel? oldJewel = SearchJewelById(id);
+        Jewel? oldJewel = iJewelService.GetJewelById(id);
         if (oldJewel == null) 
-            return BadRequest("Invalid id");
+            return BadRequest("Invalid id");    
+
         if (jewel.Id != oldJewel.Id)
             return BadRequest("id mismatch");
 
-        oldJewel.Name = jewel.Name;
-        oldJewel.Price = jewel.Price;
-        oldJewel.Category = jewel.Category;
+        iJewelService.Update(id, jewel);
      
         return NoContent();
         
@@ -76,12 +60,13 @@ public class JewelryController : ControllerBase
     [HttpDelete]
     public ActionResult Delete(int id)
     {
-        Jewel? jewelForDelete = SearchJewelById(id);
+        Jewel? jewelForDelete = iJewelService.GetJewelById(id);
         if (jewelForDelete == null) 
             return BadRequest("Invalid id");
-        int index = jewelryList.IndexOf(jewelForDelete); 
-        jewelryList.RemoveAt(index); 
+
+        iJewelService.Delete(id);
 
         return NoContent();
+         
     }
 }
