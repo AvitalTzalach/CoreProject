@@ -57,7 +57,7 @@ public class JewelryController : ControllerBase
     }
 
     //ID-פונקציה למחיקת אוביקט לפי 
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public ActionResult Delete(int id)
     {
         Jewel? jewelForDelete = iJewelService.GetJewelById(id);
@@ -69,4 +69,6 @@ public class JewelryController : ControllerBase
         return NoContent();
          
     }
+
+    
 }

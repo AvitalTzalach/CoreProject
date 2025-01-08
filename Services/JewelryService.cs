@@ -63,5 +63,13 @@ namespace Project.Services
         }
 
     }
+
+    public static class JewelryServiceHelper
+    {
+        public static void AddJewelService(this IServiceCollection BuilderServices)
+        {
+            BuilderServices.AddSingleton<IJewelService, JewelService>();
+        }
+    }
 }
 
