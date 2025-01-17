@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Project.interfaces;
 using Project.Models;
 using Project.Services;
+using Project.Exceptions;
 
 namespace Project.Controllers;
 
@@ -27,7 +28,7 @@ public class JewelryController : ControllerBase
     {
         Jewel? jewel = iJewelService.GetJewelById(id);
         if (jewel == null)
-            return BadRequest("Invalid id");
+             throw new NotFoundIdException($"Jewel with ID {id} not found.");
         return jewel;
     }
 
@@ -45,10 +46,10 @@ public class JewelryController : ControllerBase
     { 
         Jewel? oldJewel = iJewelService.GetJewelById(id);
         if (oldJewel == null) 
-            return BadRequest("Invalid id");    
+            throw new NotFoundIdException($"Jewel with ID {id} not found.");
 
         if (jewel.Id != oldJewel.Id)
-            return BadRequest("id mismatch");
+            throw new IdMismatchException("Id mismatch");
 
         iJewelService.Update(id, jewel);
      
@@ -62,7 +63,7 @@ public class JewelryController : ControllerBase
     {
         Jewel? jewelForDelete = iJewelService.GetJewelById(id);
         if (jewelForDelete == null) 
-            return BadRequest("Invalid id");
+            throw new NotFoundIdException($"Jewel with ID {id} not found.");
 
         iJewelService.Delete(id);
 

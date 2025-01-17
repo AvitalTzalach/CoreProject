@@ -1,5 +1,6 @@
 using Project.interfaces;
 using Project.Services;
+using Project.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ if (app.Environment.IsDevelopment())
     
 }
 
+app.UseErrorHandlingMiddleware();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
