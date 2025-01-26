@@ -1,4 +1,3 @@
-using Project.Exceptions;
 
 namespace Project.Middlewares;
 public class ErrorHandlingMiddleware
@@ -15,18 +14,6 @@ public class ErrorHandlingMiddleware
         try
         {
             await next(context); // מעביר את הבקשה הלאה בצינור
-        }
-        catch (NotFoundIdException ex)
-        {
-            context.Response.StatusCode = 500;
-            context.Response.ContentType = "text/plain";
-            await context.Response.WriteAsync(ex.Message);   // מטפל בשגיאה
-        }
-        catch (IdMismatchException ex)
-        {
-            context.Response.StatusCode = 500;
-            context.Response.ContentType = "text/plain";
-            await context.Response.WriteAsync(ex.Message);   // מטפל בשגיאה
         }
         catch (Exception ex)
         {
