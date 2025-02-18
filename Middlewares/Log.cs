@@ -44,3 +44,11 @@ public class LogMiddleware
         }
     }
 }
+
+public static partial class MiddlewareExtensions
+{
+    public static IApplicationBuilder UseLog(this IApplicationBuilder builder)
+    {
+        return builder.UseMiddleware<LogMiddleware>();
+    }
+}

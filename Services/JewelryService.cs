@@ -3,63 +3,86 @@ using System.Reflection.Metadata.Ecma335;
 using Project.interfaces;
 using Project.Models;
 
+
 namespace Project.Services
 {
     public class JewelService : IJewelService
     {
-        private static List<Jewel> jewelryList { get; }
+        private List<Jewel> jewelryList { get; }
+        private UpdateJson<Jewel> updateJson;
 
-        //בנאי סטאטי שנקרא בפעם הרשונה שהמחלקה נטענת + אתחול למערך
-        static JewelService()
+        //בנאי שנקרא בפעם הרשונה שהמחלקה נטענת + אתחול למערך
+        public JewelService()
         {
-            jewelryList = new List<Jewel>
-            {
-              new Jewel { Id = 1, Name = "עגילי כסף דרופ פפיון נוצץ", Price = 335, Category = CategoryJewel.Earrings },
-              new Jewel { Id = 2, Name = "טבעת כסף משאלת הנסיכה", Price = 379, Category = CategoryJewel.Ring }
-            };
+            string basePath = Directory.GetCurrentDirectory();
+            string filePath = Path.Combine(basePath, "Data", "jewelry.json");
+            updateJson = new UpdateJson<Jewel>(filePath);
+            jewelryList = updateJson.GetList();
         }
 
 
         ///CRUD///
 
         //פונקציה לקבלת רשימת הנתונים-GET
-        public  List<Jewel> GetAllList() => jewelryList;
+        public List<Jewel> GetAllList(string token)
+        {
+            int userId = TokenService.GetUserIdFromToken(token);
+            return jewelryList.Where((jewel) => jewel.UserId == userId).ToList();
+            
+        }
 
 
         //id-פונקציה לקבלת אוביקט לפי 
-        public  Jewel GetJewelById(int id) => jewelryList.FirstOrDefault(p => p.Id == id);
+        public Jewel GetJewelById(int id, string token)
+        {
+            List<Jewel> userJewelryList = GetAllList(token);
+            return userJewelryList.FirstOrDefault(p => p.Id == id);
+        }  
+
 
 
         //מכניס אוביקט חדש לרשימה
-        public  void Create(Jewel newJewel)
+        public int Create(Jewel newJewel, string token)
         {
-            int maxId = jewelryList.Max(p => p.Id);
+            int userId = TokenService.GetUserIdFromToken(token);
+            if (newJewel.UserId != userId)
+                return -1;
+            int maxId = jewelryList.Any() ? jewelryList.Max(p => p.Id) : 0;
             newJewel.Id = maxId + 1;
+            newJewel.UserId = userId;
             jewelryList.Add(newJewel);
+            updateJson.UpdateListInJson(jewelryList);
+            return 1;
         }
 
         //מעדכן אוביקט מהרשימה
-        public  void Update(int id, Jewel jewel)
+        public int Update(int id, Jewel jewel, string token)
         {
-            Jewel? oldJewel = GetJewelById(id);
+            if(jewel.UserId != TokenService.GetUserIdFromToken(token))
+            {
+                return -1;
+            }
+            Jewel oldJewel = GetJewelById(id, token);
             if (oldJewel != null)
             {
                 oldJewel.Name = jewel.Name;
                 oldJewel.Price = jewel.Price;
                 oldJewel.Category = jewel.Category;
+                updateJson.UpdateListInJson(jewelryList);
             }
-
+            return 1;
         }
 
         //ID-פונקציה למחיקת אוביקט לפי 
-        public  void Delete(int id)
+        public void Delete(int id, string token)
         {
-            Jewel? jewelForDelete = GetJewelById(id);
+            Jewel jewelForDelete = GetJewelById(id, token);
             if (jewelForDelete != null)
             {
                 int index = jewelryList.IndexOf(jewelForDelete);
                 jewelryList.RemoveAt(index);
-            }   
+                updateJson.UpdateListInJson(jewelryList);
+            }
         }
 
     }
@@ -73,3 +96,8 @@ namespace Project.Services
     }
 }
 
+// jewelryList = new List<Jewel>
+// {
+//   new Jewel { Id = 1, Name = "עגילי כסף דרופ פפיון נוצץ", Price = 335, Category = CategoryJewel.Earrings },
+//   new Jewel { Id = 2, Name = "טבעת כסף משאלת הנסיכה", Price = 379, Category = CategoryJewel.Ring }
+// };
