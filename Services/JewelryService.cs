@@ -24,65 +24,51 @@ namespace Project.Services
         ///CRUD///
 
         //פונקציה לקבלת רשימת הנתונים-GET
-        public List<Jewel> GetAllList(string token)
+        public List<Jewel> GetAllList(string type, int userId)
         {
-            int userId = TokenService.GetUserIdFromToken(token);
+            if(type.Equals("User"))
             return jewelryList.Where((jewel) => jewel.UserId == userId).ToList();
-            
+            else
+            return jewelryList;
         }
 
 
         //id-פונקציה לקבלת אוביקט לפי 
-        public Jewel GetJewelById(int id, string token)
+        public Jewel GetJewelById(int id)
         {
-            List<Jewel> userJewelryList = GetAllList(token);
-            return userJewelryList.FirstOrDefault(p => p.Id == id);
+            return jewelryList.FirstOrDefault(p => p.Id == id);
         }  
 
 
 
         //מכניס אוביקט חדש לרשימה
-        public int Create(Jewel newJewel, string token)
+        public void Create(Jewel newJewel)
         {
-            int userId = TokenService.GetUserIdFromToken(token);
-            if (newJewel.UserId != userId)
-                return -1;
+            //int userId = TokenService.GetUserIdFromToken(token);
+            // if (newJewel.UserId != userId)
+            //     return -1;
             int maxId = jewelryList.Any() ? jewelryList.Max(p => p.Id) : 0;
             newJewel.Id = maxId + 1;
-            newJewel.UserId = userId;
+            //newJewel.UserId = userId;
             jewelryList.Add(newJewel);
             updateJson.UpdateListInJson(jewelryList);
-            return 1;
         }
 
         //מעדכן אוביקט מהרשימה
-        public int Update(int id, Jewel jewel, string token)
-        {
-            if(jewel.UserId != TokenService.GetUserIdFromToken(token))
-            {
-                return -1;
-            }
-            Jewel oldJewel = GetJewelById(id, token);
-            if (oldJewel != null)
-            {
-                oldJewel.Name = jewel.Name;
-                oldJewel.Price = jewel.Price;
-                oldJewel.Category = jewel.Category;
-                updateJson.UpdateListInJson(jewelryList);
-            }
-            return 1;
+        public void Update(Jewel oldJewel, Jewel newJewel)
+        {  
+            oldJewel.Name = newJewel.Name;
+            oldJewel.Price = newJewel.Price;
+            oldJewel.Category = newJewel.Category;
+            updateJson.UpdateListInJson(jewelryList);
         }
 
         //ID-פונקציה למחיקת אוביקט לפי 
-        public void Delete(int id, string token)
+        public void Delete(Jewel jewel)
         {
-            Jewel jewelForDelete = GetJewelById(id, token);
-            if (jewelForDelete != null)
-            {
-                int index = jewelryList.IndexOf(jewelForDelete);
-                jewelryList.RemoveAt(index);
-                updateJson.UpdateListInJson(jewelryList);
-            }
+            int index = jewelryList.IndexOf(jewel);
+            jewelryList.RemoveAt(index);
+            updateJson.UpdateListInJson(jewelryList);
         }
 
     }

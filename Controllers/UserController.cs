@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Project.interfaces;
 using Project.Models;
+using IAuthorizationService = Project.interfaces.IAuthorizationService;
 using Project.Services;
 
 namespace Project.Controllers;
@@ -11,9 +12,10 @@ namespace Project.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize]
-public class UserController(IUserService iUserService) : ControllerBase
+public class UserController(IUserService iUserService, IAuthorizationService iAuthorizationService) : ControllerBase
 {
     private IUserService iUserService = iUserService;
+    private IAuthorizationService iAuthorizationService = iAuthorizationService;
 
     //פונקציה לקבלת רשימת הנתונים
     [HttpGet]
@@ -23,21 +25,15 @@ public class UserController(IUserService iUserService) : ControllerBase
         return iUserService.GetAllList();
     }
 
-
     //id-פונקציה לקבלת אוביקט לפי 
     [HttpGet("{id}")]
     [Authorize]
     public ActionResult<User> Get(int id)
     {
-        string typeUser = User.FindFirst("Type")?.Value;
-        if (typeUser.Equals("User"))
-        {
-            int userId = int.Parse(User.FindFirst("UserId")?.Value);
-            if (userId != id)
-            {
-                return Unauthorized();
-            }
-        }
+        (string type,int userId)=iAuthorizationService.GetUserClaims(User);
+        if (iAuthorizationService.IsAccessDenied(id,type,userId))
+            return Unauthorized();
+        
         User? user = iUserService.GetUserById(id);
         if (user == null)
             return BadRequest("Invalid id");
@@ -49,7 +45,7 @@ public class UserController(IUserService iUserService) : ControllerBase
     [Authorize(Policy = "Admin")]
     public ActionResult Create([FromBody] User newUser)
     {
-        int userId = int.Parse(User.FindFirst("UserId")?.Value);
+        (string type, int userId) = iAuthorizationService.GetUserClaims(User);
         if (newUser.Id == userId)//מנהל לא יכול ליצור את עצמו
         {
             return Unauthorized();
@@ -65,14 +61,10 @@ public class UserController(IUserService iUserService) : ControllerBase
     {
         if (id != newUser.Id)
             return BadRequest("Id mismatch");
-        string typeUser = User.FindFirst("Type")?.Value;
-        if (typeUser.Equals("User"))
+        (string type, int userId) = iAuthorizationService.GetUserClaims(User);
+        if (iAuthorizationService.IsAccessDenied(id, type, userId) || type.Equals("User") && newUser.Type.Equals("Admin"))
         {
-            int userId = int.Parse(User.FindFirst("UserId")?.Value);
-            if (userId != id || newUser.Type.Equals("Admin"))//משתמש יכול לעדכן רק את עצמו
-            {
-                return Unauthorized();
-            }
+            return Unauthorized();
         }
         User? oldUser = iUserService.GetUserById(id);
         if (oldUser == null)
@@ -97,35 +89,20 @@ public class UserController(IUserService iUserService) : ControllerBase
 
 
     [AllowAnonymous]
-[HttpPost("login")]
-public ActionResult Login([FromBody] User user)
-{
-    User? existUser = iUserService.GetExistUser(user.Name, user.Password);
-    if (existUser == null)
-        return Unauthorized();
-
-    var claims = new List<Claim>();
-
-    if ((user.Name == "Tami" || user.Name == "Avital") && user.Password == "T&a913114!")
+    [HttpPost("login")]
+    public ActionResult Login([FromBody] User user)
     {
-        claims.Add(new Claim("Type", "Admin"));
+        User? existUser = iUserService.GetExistUser(user.Name, user.Password);
+        if (existUser == null)
+            return Unauthorized();
+        string? generatedToken = iUserService.Login(existUser);
+
+        if (string.IsNullOrEmpty(generatedToken))
+        {
+            return StatusCode(500, "Error generating token");
+        }
+
+        return Ok(new { Name = existUser.Name, token = generatedToken });
     }
-    else
-    {
-        claims.Add(new Claim("Type", "User"));
-    }
-
-    claims.Add(new Claim("UserId", existUser.Id.ToString()));
-
-    var token = TokenService.GetToken(claims);
-    var generatedToken = TokenService.WriteToken(token);
-
-    if (string.IsNullOrEmpty(generatedToken))
-    {
-        return StatusCode(500, "Error generating token");
-    }
-
-    return Ok(new { Name = existUser.Name, token = generatedToken });
-}
 
 }

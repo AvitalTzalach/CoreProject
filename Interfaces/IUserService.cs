@@ -1,4 +1,4 @@
-
+using Microsoft.AspNetCore.Mvc;
 using Project.Models;
 
 namespace Project.interfaces
@@ -16,6 +16,8 @@ namespace Project.interfaces
         void Delete(int id);
 
         User? GetExistUser(string name, string Password);
+
+        string? Login(User user);
 
     }
 }    

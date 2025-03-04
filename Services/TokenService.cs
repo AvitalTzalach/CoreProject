@@ -3,14 +3,16 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Project.interfaces;
+
 
 namespace Project.Services;
 
-public class TokenService
+public class TokenService : ITokenService
 {
-    private static SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SXkSqsKyNUyvGbnHs7ke2NCq8zQzNLW7mPmHbnZZ"));
-    private static string issuer = "https://jewelry-demo.com";
-    public static SecurityToken GetToken(List<Claim> claims) =>
+    private SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("SXkSqsKyNUyvGbnHs7ke2NCq8zQzNLW7mPmHbnZZ"));
+    private string issuer = "https://jewelry-demo.com";
+    public SecurityToken GetToken(List<Claim> claims) =>
             new JwtSecurityToken(
                 issuer,
                 issuer,
@@ -19,7 +21,7 @@ public class TokenService
                 signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256)
             );
 
-    public static TokenValidationParameters GetTokenValidationParameters() =>
+    public TokenValidationParameters GetTokenValidationParameters() =>
         new TokenValidationParameters
         {
             ValidIssuer = issuer,
@@ -28,24 +30,32 @@ public class TokenService
             ClockSkew = TimeSpan.Zero // remove delay of token when expire
         };
 
-    public static string WriteToken(SecurityToken token) =>
+    public string WriteToken(SecurityToken token) =>
         new JwtSecurityTokenHandler().WriteToken(token);
 
-    public static int GetUserIdFromToken(string token)
-    {
-        token = token.Replace("Bearer ", "").Trim();
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
-        string userIdFromToken = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
-        return int.Parse(userIdFromToken);
-    }
+    // public static int GetUserIdFromToken(string token)
+    // {
+    //     token = token.Replace("Bearer ", "").Trim();
+    //     var handler = new JwtSecurityTokenHandler();
+    //     var jwtToken = handler.ReadJwtToken(token);
+    //     string userIdFromToken = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+    //     return int.Parse(userIdFromToken);
+    // }
 
-    public static string GetDetailsFromToken(string token, string detail)
+    // public static string GetDetailsFromToken(string token, string detail)
+    // {
+    //     token = token.Replace("Bearer ", "").Trim();
+    //     var handler = new JwtSecurityTokenHandler();
+    //     var jwtToken = handler.ReadJwtToken(token);
+    //     string detailFromToken = jwtToken.Claims.FirstOrDefault(c => c.Type == detail)?.Value;
+    //     return detailFromToken;
+    // }
+}
+
+public static partial class ServiceHelper
+{
+    public static void AddTokenService(this IServiceCollection BuilderServices)
     {
-        token = token.Replace("Bearer ", "").Trim();
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
-        string detailFromToken = jwtToken.Claims.FirstOrDefault(c => c.Type == detail)?.Value;
-        return detailFromToken;
+        BuilderServices.AddSingleton<ITokenService, TokenService>();
     }
 }

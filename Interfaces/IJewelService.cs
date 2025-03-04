@@ -5,15 +5,15 @@ namespace Project.interfaces
 {
     public interface IJewelService
     {
-        List<Jewel> GetAllList(string token);
+        List<Jewel> GetAllList(string type, int userId);
 
-        Jewel GetJewelById(int id, string token);
+        Jewel GetJewelById(int id);
 
-        int Create(Jewel newJewel, string token);
+        void Create(Jewel newJewel);
 
-        int Update(int id, Jewel jewel, string token);
+        void Update(Jewel oldJewel, Jewel newJewel);
 
-        void Delete(int id, string token);
+        void Delete(Jewel jewel);
 
 
     }

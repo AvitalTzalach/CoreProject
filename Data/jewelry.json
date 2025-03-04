@@ -2,8 +2,15 @@
   {
     "Id": 1,
     "UserId": 3,
-    "Name": "string",
+    "Name": "\u05DE\u05E0\u05DC\u05EA",
     "Price": 225,
+    "Category": 2
+  },
+  {
+    "Id": 2,
+    "UserId": 0,
+    "Name": "nice ring",
+    "Price": 252,
     "Category": 0
   }
 ]

@@ -1,4 +1,34 @@
-const url = '/Jewelry';
+//localStorage.removeItem("token");
+isTokenExpired = (token) => {//GPT
+    const payloadBase64 = token.split(".")[1]; // פירוק JWT
+    const payloadJSON = atob(payloadBase64); // דיקוד Base64
+    const payload = JSON.parse(payloadJSON); // הפיכת JSON לאובייקט
+    const currentTime = Math.floor(Date.now() / 1000); // זמן נוכחי בשניות
+    return payload.exp < currentTime; // true אם פג תוקף
+}
+let token = localStorage.getItem("token");
+token = JSON.parse(token);
+if (token == null)
+    window.location.href = "login.html";
+else if (isTokenExpired(token.token)) {
+    localStorage.removeItem("token"); // מחיקת הטוקן
+    window.location.href = "login.html"; // מעבר לדף התחברות
+}
+userType = (token) => {
+    const tokenParts = token.split(".");
+    const payload = JSON.parse(atob(tokenParts[1])); // פענוח ה-Payload
+    return payload.Type;
+}
+alert("before");
+if (userType(token.token) === 'Admin')
+    document.getElementById("Display-users").hidden = false;
+alert("after");
+// פונקציה להפניה לדף המשתמשים
+const redirectToUsersPage = () => {
+    window.location.href = "users.html"; // שנה את זה לכתובת הדף שלך
+};
+
+const uri = '/Jewelry';
 let jewelryList = [];
 
 const addJewel = (event) => {
@@ -8,7 +38,6 @@ const addJewel = (event) => {
     const categoryJewel = document.getElementById('jewelry-select');
 
     const indexCategory = categoryJewel.selectedIndex;
-    
 
     const newJewel = {
         id: 0,
@@ -17,11 +46,12 @@ const addJewel = (event) => {
         category: indexCategory
     };
 
-    fetch(url, {
+    fetch(uri, {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${token.token}`
         },
         body: JSON.stringify(newJewel)
     })
@@ -56,11 +86,12 @@ const updateJewel = (event) => {
         category: document.getElementById('edit-jewelry-select').selectedIndex
     };
 
-    fetch(`${url}/${jewelId}`, {
+    fetch(`${uri}/${jewelId}`, {
         method: 'PUT',
         headers: {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${token.token}`
         },
         body: JSON.stringify(updatedJewel)
     })
@@ -77,8 +108,12 @@ const closeInput = () => {
 }
 
 const deleteJewel = (id) => {
-    fetch(`${url}/${id}`, {
-        method: 'DELETE'
+    fetch(`${uri}/${id}`, {
+        method: 'DELETE',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token.token}` // דוגמה לשימוש ב-Token
+        }
     })
         .then(() => getJewelry())
         .catch(error => console.error('Unable to delete jewel.', error));
@@ -115,7 +150,7 @@ const _displayItems = (data) => {
         tdPrice.innerHTML = item.price;
 
         let tdCategory = dispalayJewelInRow.insertCell(3);
-        tdCategory.innerHTML = item.category;
+        tdCategory.innerHTML = document.getElementById("edit-jewelry-select")[item.category].innerHTML;
 
         let tdEdit = dispalayJewelInRow.insertCell(4);
         tdEdit.appendChild(editButton);
@@ -130,7 +165,13 @@ const _displayItems = (data) => {
 
 const getJewelry = () => {
     //לקבלת מערך הפריטים GET גישה לפונקציית 
-    fetch(url)
+    fetch(uri, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token.token}` // הוספת ה-Token ל-Header
+        }
+    })
         .then(response => response.json())
         .then(data => _displayItems(data))
         .catch(error => console.error('Unable to get items.', error));

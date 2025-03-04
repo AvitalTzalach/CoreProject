@@ -22,21 +22,19 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Add services to the container.
-builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer();
+builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<ITokenService>((options, TokenService) =>
     {
-        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(cfg =>
-    {
-        cfg.RequireHttpsMetadata = true;
-        cfg.TokenValidationParameters = TokenService.GetTokenValidationParameters();
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = TokenService.GetTokenValidationParameters();
     });
-
 builder.Services.AddAuthorization(cfg =>
     {
         cfg.AddPolicy("Admin", policy => policy.RequireClaim("type", "Admin"));
         cfg.AddPolicy("User", policy => policy.RequireClaim("type", "User"));
-    });    
+    });
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -51,6 +49,7 @@ builder.Services.AddSwaggerGen(c =>
             Name = "Authorization",
             Type = SecuritySchemeType.ApiKey
         });
+
         c.AddSecurityRequirement(new OpenApiSecurityRequirement {
         { new OpenApiSecurityScheme
                 {
@@ -62,6 +61,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 builder.Services.AddJewelService();
 builder.Services.AddUserService();
+builder.Services.AddAuthorizationService();
+builder.Services.AddTokenService();
 
 var app = builder.Build();
 
@@ -73,20 +74,16 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    
+
 }
 
 app.UseErrorHandlingMiddleware();
-
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
-
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
+
 
 app.MapControllers();
-
 app.Run();
