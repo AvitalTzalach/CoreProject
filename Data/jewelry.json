@@ -7,10 +7,10 @@
     "Category": 2
   },
   {
-    "Id": 2,
-    "UserId": 0,
-    "Name": "nice ring",
-    "Price": 252,
-    "Category": 0
+    "Id": 3,
+    "UserId": 2,
+    "Name": "nice bracelet",
+    "Price": 230,
+    "Category": 3
   }
 ]

@@ -44,6 +44,10 @@ namespace Project.Services
         {
             int maxId = usersList.Any() ? usersList.Max(p => p.Id) : 0;
             newUser.Id = maxId + 1;
+            if (!(newUser.Type.Equals("User") || newUser.Type.Equals("Admin")))
+            {
+                newUser.Type = "User";
+            }
             usersList.Add(newUser);
             updateJson.UpdateListInJson(usersList);
         }
@@ -72,11 +76,11 @@ namespace Project.Services
             return usersList.FirstOrDefault(user => user.Name == name && user.Password == Password);
         }
 
-        public string? Login(User user)
+        public string? Login(User existUser)
         {
             var claims = new List<Claim>();
 
-            if ((user.Name == "Tami" || user.Name == "Avital") && user.Password == "T&a913114!")
+            if (existUser.Type.Equals("Admin"))
             {
                 claims.Add(new Claim("Type", "Admin"));
             }
@@ -85,7 +89,7 @@ namespace Project.Services
                 claims.Add(new Claim("Type", "User"));
             }
 
-            claims.Add(new Claim("UserId", user.Id.ToString()));
+            claims.Add(new Claim("UserId", existUser.Id.ToString()));
 
             var token = iTokenService.GetToken(claims);
             String generatedToken = iTokenService.WriteToken(token);

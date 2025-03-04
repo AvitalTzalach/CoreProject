@@ -30,10 +30,9 @@ public class UserController(IUserService iUserService, IAuthorizationService iAu
     [Authorize]
     public ActionResult<User> Get(int id)
     {
-        (string type,int userId)=iAuthorizationService.GetUserClaims(User);
-        if (iAuthorizationService.IsAccessDenied(id,type,userId))
+        (string type, int userId) = iAuthorizationService.GetUserClaims(User);
+        if (iAuthorizationService.IsAccessDenied(id, type, userId))
             return Unauthorized();
-        
         User? user = iUserService.GetUserById(id);
         if (user == null)
             return BadRequest("Invalid id");

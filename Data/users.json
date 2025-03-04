@@ -1,8 +1,20 @@
 [
-    {
-        "Id": 1,
-        "Name": "Avital",
-        "Password": "T&a913114!",
-        "Type": "Admin"
-    }
+  {
+    "Id": 1,
+    "Name": "Avital",
+    "Password": "T\u0026a913114!",
+    "Type": "Admin"
+  },
+  {
+    "Id": 2,
+    "Name": "yossi",
+    "Password": "145",
+    "Type": "User"
+  },
+  {
+    "Id": 3,
+    "Name": "gal",
+    "Password": "789",
+    "Type": "User"
+  }
 ]

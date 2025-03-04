@@ -14,15 +14,16 @@ else if (isTokenExpired(token.token)) {
     localStorage.removeItem("token"); // מחיקת הטוקן
     window.location.href = "login.html"; // מעבר לדף התחברות
 }
-userType = (token) => {
+userInfo = (token) => {
     const tokenParts = token.split(".");
     const payload = JSON.parse(atob(tokenParts[1])); // פענוח ה-Payload
-    return payload.Type;
+    return payload;
 }
-alert("before");
-if (userType(token.token) === 'Admin')
+
+if (userInfo(token.token).Type === 'Admin')
     document.getElementById("Display-users").hidden = false;
-alert("after");
+else
+    document.getElementById("Display-details-user").hidden = false;
 // פונקציה להפניה לדף המשתמשים
 const redirectToUsersPage = () => {
     window.location.href = "users.html"; // שנה את זה לכתובת הדף שלך
@@ -41,6 +42,7 @@ const addJewel = (event) => {
 
     const newJewel = {
         id: 0,
+        userId: parseInt(userInfo(token.token).UserId, 10),
         name: nameJewel.value.trim(),
         price: pricejewel.value.trim(),
         category: indexCategory

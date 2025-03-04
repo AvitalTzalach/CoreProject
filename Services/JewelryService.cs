@@ -44,9 +44,6 @@ namespace Project.Services
         //מכניס אוביקט חדש לרשימה
         public void Create(Jewel newJewel)
         {
-            //int userId = TokenService.GetUserIdFromToken(token);
-            // if (newJewel.UserId != userId)
-            //     return -1;
             int maxId = jewelryList.Any() ? jewelryList.Max(p => p.Id) : 0;
             newJewel.Id = maxId + 1;
             //newJewel.UserId = userId;

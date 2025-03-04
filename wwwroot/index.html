@@ -24,12 +24,13 @@
     </form>
     <br>
     <button id="Display-users" hidden onclick="redirectToUsersPage()">Display users</button>
+    <button id="Display-details-user" hidden onclick="redirectToUsersPage()">Display User Details</button>
     <br>
 
     <div id="editForm">
         <h3>Edit</h3>
         <form onsubmit="updateJewel(event)">
-            <input type="hidden" id="edit-id">
+            <input type="text" id="edit-id" readonly>
             <input type="text" id="edit-name" placeholder="Name">
             <input type="number" id="edit-price" placeholder="Price">
             <select name="options" id="edit-jewelry-select">

@@ -77,7 +77,7 @@ public class JewelryController : ControllerBase
         Jewel? jewel = iJewelService.GetJewelById(id);
         if (jewel == null)
             return BadRequest("invalid id");
-        if (iAuthorizationService.IsAccessDenied(jewel.Id, type, userId))
+        if (iAuthorizationService.IsAccessDenied(jewel.UserId, type, userId))
             return Unauthorized();
         iJewelService.Delete(jewel);
         return NoContent();  
