@@ -1,8 +1,12 @@
 # Ignore binaries and object files
 bin/
 obj/
+Logs/
+
 
 # Ignore executable files
 *.exe
 *.dll
+
+
 
