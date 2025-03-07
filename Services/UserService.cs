@@ -9,10 +9,11 @@ namespace Project.Services
     {
         private List<User> usersList { get; }
         private UpdateJson<User> updateJson;
+        private readonly IJewelService ijewelService;
         private readonly ITokenService iTokenService;
 
         //בנאי שנקרא בפעם הרשונה שהמחלקה נטענת + אתחול למערך
-        public UserService(ITokenService iTokenService)
+        public UserService(ITokenService iTokenService, IJewelService ijewelService)
         {
             string basePath = Directory.GetCurrentDirectory();
             string filePath = Path.Combine(basePath, "Data", "users.json");
@@ -20,6 +21,7 @@ namespace Project.Services
             usersList = updateJson.GetList();
             Console.WriteLine(usersList);
             this.iTokenService = iTokenService;
+            this.ijewelService = ijewelService;
         }
 
 
@@ -63,11 +65,13 @@ namespace Project.Services
         }
 
         //ID-פונקציה למחיקת אוביקט לפי 
-        public void Delete(int id)
+        public void Delete(string type, int id)
         {
             int index = usersList.IndexOf(GetUserById(id));
             usersList.RemoveAt(index);
             updateJson.UpdateListInJson(usersList);
+            List<Jewel> userJewelryList = ijewelService.GetAllList(type, id);
+            userJewelryList.ForEach(jewel => {if(id == jewel.UserId) ijewelService.Delete(jewel);});
         }
 
 

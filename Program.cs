@@ -27,7 +27,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
     .Configure<ITokenService>((options, TokenService) =>
     {
-        options.RequireHttpsMetadata = false;
+        options.RequireHttpsMetadata = true;
         options.TokenValidationParameters = TokenService.GetTokenValidationParameters();
     });
 builder.Services.AddAuthorization(cfg =>

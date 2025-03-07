@@ -78,11 +78,11 @@ public class UserController(IUserService iUserService, IAuthorizationService iAu
     public ActionResult Delete(int id)
     {
         //האם מנהל יכול למחוק את עצמו
-        //string jwtEncoded = Request.Headers.Authorization;
+        (string type, int userId) = iAuthorizationService.GetUserClaims(User);
         User? userForDelete = iUserService.GetUserById(id);
         if (userForDelete == null)
             return BadRequest("Invalid id");
-        iUserService.Delete(id);
+        iUserService.Delete(type, id);
         return NoContent();
     }
 

@@ -7,9 +7,11 @@
     <link rel="stylesheet" href="./css/site.css">
 </head>
 <body>
+    <button id="log-out" onclick="logOut()">Log out</button>
     <h1>Jewelry CRUD</h1>
-    <h3>Add</h3>
+    <h2>Add</h2>
     <form method="POST" onsubmit="addJewel(event)">
+        <input type="text" id="add-userId" hidden placeholder="UserId">
         <input type="text" id="add-name" placeholder="Name">
         <input type="number" id="add-price" placeholder="Price">
 
@@ -48,6 +50,7 @@
     <table>
         <tr>
             <th>Id</th>
+            <th>UserId</th>
             <th>Name</th>
             <th>Price</th>
             <th>Category</th>

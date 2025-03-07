@@ -14,6 +14,12 @@ else if (isTokenExpired(token.token)) {
     localStorage.removeItem("token"); // מחיקת הטוקן
     window.location.href = "login.html"; // מעבר לדף התחברות
 }
+
+const logOut = () => {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+
 userInfo = (token) => {
     const tokenParts = token.split(".");
     const payload = JSON.parse(atob(tokenParts[1])); // פענוח ה-Payload
@@ -21,7 +27,10 @@ userInfo = (token) => {
 }
 
 if (userInfo(token.token).Type === 'Admin')
+{
     document.getElementById("Display-users").hidden = false;
+    document.getElementById("add-userId").hidden = false;
+}
 else
     document.getElementById("Display-details-user").hidden = false;
 // פונקציה להפניה לדף המשתמשים
@@ -34,6 +43,11 @@ let jewelryList = [];
 
 const addJewel = (event) => {
     event.preventDefault();
+    let userId = document.getElementById('add-userId');
+    if(userId.hidden == false)
+        userId = document.getElementById('add-userId');
+    else
+        userId = parseInt(userInfo(token.token).UserId, 10);
     const nameJewel = document.getElementById('add-name');
     const pricejewel = document.getElementById('add-price');
     const categoryJewel = document.getElementById('jewelry-select');
@@ -42,7 +56,7 @@ const addJewel = (event) => {
 
     const newJewel = {
         id: 0,
-        userId: parseInt(userInfo(token.token).UserId, 10),
+        userId: userId.value.trim(),
         name: nameJewel.value.trim(),
         price: pricejewel.value.trim(),
         category: indexCategory
@@ -63,6 +77,7 @@ const addJewel = (event) => {
             nameJewel.value = '';
             pricejewel.value = '';
             categoryJewel.value = '';
+            userId.value = '';
         })
         .catch(error => console.error('Unable to add jewel.', error));
 
@@ -145,19 +160,22 @@ const _displayItems = (data) => {
         let tdId = dispalayJewelInRow.insertCell(0);
         tdId.innerHTML = item.id;
 
-        let tdName = dispalayJewelInRow.insertCell(1);
+        let tdUserId = dispalayJewelInRow.insertCell(1);
+        tdUserId.innerHTML = item.userId;
+
+        let tdName = dispalayJewelInRow.insertCell(2);
         tdName.innerHTML = item.name;
 
-        let tdPrice = dispalayJewelInRow.insertCell(2);
+        let tdPrice = dispalayJewelInRow.insertCell(3);
         tdPrice.innerHTML = item.price;
 
-        let tdCategory = dispalayJewelInRow.insertCell(3);
+        let tdCategory = dispalayJewelInRow.insertCell(4);
         tdCategory.innerHTML = document.getElementById("edit-jewelry-select")[item.category].innerHTML;
 
-        let tdEdit = dispalayJewelInRow.insertCell(4);
+        let tdEdit = dispalayJewelInRow.insertCell(5);
         tdEdit.appendChild(editButton);
 
-        let tdDelete = dispalayJewelInRow.insertCell(5);
+        let tdDelete = dispalayJewelInRow.insertCell(6);
         tdDelete.appendChild(deleteButton);
     });
 

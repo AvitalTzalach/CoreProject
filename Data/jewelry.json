@@ -1,14 +1,14 @@
 [
   {
     "Id": 1,
-    "UserId": 3,
-    "Name": "\u05DE\u05E0\u05DC\u05EA",
-    "Price": 225,
-    "Category": 2
+    "UserId": 2,
+    "Name": "nice ring",
+    "Price": 158,
+    "Category": 0
   },
   {
-    "Id": 3,
-    "UserId": 2,
+    "Id": 2,
+    "UserId": 3,
     "Name": "nice bracelet",
     "Price": 230,
     "Category": 3

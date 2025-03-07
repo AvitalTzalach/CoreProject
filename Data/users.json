@@ -8,13 +8,13 @@
   {
     "Id": 2,
     "Name": "yossi",
-    "Password": "145",
+    "Password": "123",
     "Type": "User"
   },
   {
     "Id": 3,
-    "Name": "gal",
-    "Password": "789",
+    "Name": "dani",
+    "Password": "145",
     "Type": "User"
   }
 ]

@@ -46,7 +46,6 @@ namespace Project.Services
         {
             int maxId = jewelryList.Any() ? jewelryList.Max(p => p.Id) : 0;
             newJewel.Id = maxId + 1;
-            //newJewel.UserId = userId;
             jewelryList.Add(newJewel);
             updateJson.UpdateListInJson(jewelryList);
         }

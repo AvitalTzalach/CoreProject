@@ -5,6 +5,16 @@ if (token == null)
 const uri = '/User';
 let UsersList = [];
 
+//הפניה לדף תכשיטי המשתמש
+const redirectToJewelryPage = () => {
+    window.location.href = "index.html";
+}
+
+const logOut = () => {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+}
+
 const addUser = (event) => {
     event.preventDefault();
     const name = document.getElementById('add-name');
@@ -34,7 +44,7 @@ const addUser = (event) => {
             password.value = '';
             type.value = '';
         })
-        .catch(error => alert('Unable to add user.', error));
+        .catch(error => {console.error("Unable to add user,",error); alert(`Unable to add user, ${error.message}`)});
 
 }
 
@@ -55,8 +65,8 @@ const updateUser = (event) => {
     const updatedUser = {
         id: parseInt(userId, 10),
         name: document.getElementById('edit-name').value.trim(),
-        password: document.getElementById('edit-password').value,
-        type: document.getElementById('edit-users-select').value
+        password: document.getElementById('edit-password').value.trim(),
+        type: document.getElementById('edit-users-select').value.trim()
     };
 
     fetch(`${uri}/${userId}`, {
@@ -73,10 +83,9 @@ const updateUser = (event) => {
             // אם הסטטוס הוא 401 או כל סטטוס אחר של שגיאה
             throw new Error('Unauthorized');
         }
-        return response.json(); // במקרה של הצלחה, אם יש תוכן
     })
         .then(() => getUsers())
-        .catch(error => alert(`Unable to update user, ${error.message}`));
+        .catch(error => {console.error("Unable to update user,",error); alert(`Unable to update user, ${error.message}`)});
 
     closeInput();
 
@@ -92,11 +101,16 @@ const deleteUser = (id) => {
         method: 'DELETE',
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token.token}` // דוגמה לשימוש ב-Token
+            "Authorization": `Bearer ${token.token}` 
         }
     })
+    .then((response => {
+        if(!response.ok){
+            throw new Error('Unauthorize');
+        }
+    }))
         .then(() => getUsers())
-        .catch(error => alert('Unable to delete user.', error));
+        .catch(error => {console.error("Unable to delete user,",error); alert(`Unable to delete user, ${error.message}`)});
 }
 
 
@@ -166,6 +180,6 @@ const getUsers = () => {
         .then(response => response.json())
         .then(data => { const usersList = Array.isArray(data) ? data : [data];
             _displayItems(usersList);})
-        .catch(error => console.error('Unable to get items.', error));
+        .catch(error => {console.error("Unable to get items,",error); alert(`Unable to get items, ${error.message}`)});
 
 }
