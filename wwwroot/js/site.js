@@ -1,18 +1,30 @@
 //localStorage.removeItem("token");
-isTokenExpired = (token) => {//GPT
-    const payloadBase64 = token.split(".")[1]; // פירוק JWT
-    const payloadJSON = atob(payloadBase64); // דיקוד Base64
-    const payload = JSON.parse(payloadJSON); // הפיכת JSON לאובייקט
-    const currentTime = Math.floor(Date.now() / 1000); // זמן נוכחי בשניות
-    return payload.exp < currentTime; // true אם פג תוקף
-}
+const uri = '/Jewelry';
+let jewelryList = [];
+let currentType = null;
+let currentUserId = null;
 let token = localStorage.getItem("token");
 token = JSON.parse(token);
+
+isTokenExpired = (token) => {
+    const payloadBase64 = token.split(".")[1]; 
+    const payloadJSON = atob(payloadBase64); 
+    const payload = JSON.parse(payloadJSON); 
+    const currentTime = Math.floor(Date.now() / 1000); 
+    return payload.exp < currentTime; // true אם פג תוקף
+}
+
 if (token == null)
     window.location.href = "login.html";
 else if (isTokenExpired(token.token)) {
     localStorage.removeItem("token"); // מחיקת הטוקן
     window.location.href = "login.html"; // מעבר לדף התחברות
+}
+else{
+    const tokenParts = token.split(".");
+    const payload = JSON.parse(atob(tokenParts[1])); // פענוח ה-Payload
+    currentType = payload.Type;
+    currentUserId = payload.UserId;
 }
 
 const logOut = () => {
@@ -20,26 +32,18 @@ const logOut = () => {
     window.location.href = "login.html";
 }
 
-userInfo = (token) => {
-    const tokenParts = token.split(".");
-    const payload = JSON.parse(atob(tokenParts[1])); // פענוח ה-Payload
-    return payload;
-}
-
-if (userInfo(token.token).Type === 'Admin')
+if (currentType === 'Admin')
 {
     document.getElementById("Display-users").hidden = false;
     document.getElementById("add-userId").hidden = false;
 }
 else
     document.getElementById("Display-details-user").hidden = false;
+
 // פונקציה להפניה לדף המשתמשים
 const redirectToUsersPage = () => {
     window.location.href = "users.html"; // שנה את זה לכתובת הדף שלך
 };
-
-const uri = '/Jewelry';
-let jewelryList = [];
 
 const addJewel = (event) => {
     event.preventDefault();
@@ -47,7 +51,7 @@ const addJewel = (event) => {
     if(userId.hidden == false)
         userId = document.getElementById('add-userId');
     else
-        userId = parseInt(userInfo(token.token).UserId, 10);
+        userId = parseInt(currentUserId, 10);
     const nameJewel = document.getElementById('add-name');
     const pricejewel = document.getElementById('add-price');
     const categoryJewel = document.getElementById('jewelry-select');
@@ -195,5 +199,4 @@ const getJewelry = () => {
         .then(response => response.json())
         .then(data => _displayItems(data))
         .catch(error => console.error('Unable to get items.', error));
-
 }
